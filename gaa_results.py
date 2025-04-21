@@ -39,7 +39,7 @@ if response.status_code == 200:
             competition_name = competition.get_text(strip=True) if competition else "Unknown Competition"
             match_date = match.get("data-match-date", "No date available")
             venue = match.find("div", class_="gar-match-item__venue")
-            venue_name = venue.get_text(strip=True) if venue else "No venue available"
+            venue_name = venue.get_text(strip=True).replace('Venue:', '').strip() if venue else "No venue available"
 
             scores = match.find_all("div", class_="gar-match-item__score")
             if len(scores) == 2:

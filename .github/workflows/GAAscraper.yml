@@ -34,3 +34,4 @@ jobs:
           git commit -m "Update GAA results CSV [skip ci]" || echo "No changes to commit"
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git push
+

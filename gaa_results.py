@@ -12,7 +12,7 @@ import subprocess
 
 # Today's date for filename
 today = datetime.today()
-filename = f"gaa_matches_{today.strftime('%Y-%m-%d')}.csv"
+filename = f"gaa_matches_{today.strftime('%Y-%m')}.csv"
 
 # URL for GAA fixtures page
 url = "https://www.gaa.ie/fixtures-results"

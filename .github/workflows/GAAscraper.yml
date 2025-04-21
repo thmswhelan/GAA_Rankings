@@ -22,4 +22,4 @@ jobs:
           pip install requests beautifulsoup4
 
       - name: Run scraper script
-        run: python gaa_scraper.py
+        run: python gaa_results.py

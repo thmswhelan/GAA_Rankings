@@ -22,4 +22,4 @@ jobs:
           pip install requests beautifulsoup4
 
       - name: Run scraper script
-        run: python GAA_Results.ipynb  # <-- replace with your actual script name if different
+        run: python GAA_Results.ipynb

@@ -30,12 +30,12 @@ if response.status_code == 200:
         raw_date = match.get("data-match-date", None)
         if raw_date:
             try:
-            parsed_date = datetime.fromisoformat(raw_date)
-            match_date = parsed_date.strftime("%d/%m/%Y")
+                parsed_date = datetime.fromisoformat(raw_date)
+                match_date = parsed_date.strftime("%d/%m/%Y")
             except ValueError:
-            match_date = "Invalid date"
+                match_date = "Invalid date"
         else:
-        match_date = "No date available"
+            match_date = "No date available"
         scores = match.find_all("div", class_="gar-match-item__score")
         if len(scores) == 2:
             home_score = scores[0].get_text(strip=True)

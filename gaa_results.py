@@ -5,10 +5,6 @@ from datetime import datetime
 import subprocess
 import os
 
-# Helper to keep Excel from auto-formatting
-def excel_safe(val):
-    return f'="{val}"' if val else '=""'
-
 # Today's date
 today = datetime.today()
 general_file = "gaa_results.csv"
@@ -30,7 +26,16 @@ if response.status_code == 200:
         match_date = match.get("data-match-date", "No date available")
         venue = match.find("div", class_="gar-match-item__venue")
         venue_name = venue.get_text(strip=True).replace('Venue:', '').strip() if venue else "No venue available"
-
+        # Get and format the match date
+        raw_date = match.get("data-match-date", None)
+        if raw_date:
+            try:
+            parsed_date = datetime.fromisoformat(raw_date)
+            match_date = parsed_date.strftime("%d/%m/%Y")
+            except ValueError:
+            match_date = "Invalid date"
+        else:
+        match_date = "No date available"
         scores = match.find_all("div", class_="gar-match-item__score")
         if len(scores) == 2:
             home_score = scores[0].get_text(strip=True)

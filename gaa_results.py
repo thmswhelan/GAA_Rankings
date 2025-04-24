@@ -52,7 +52,7 @@ if response.status_code == 200:
         away_team_name = away_team.get_text(strip=True) if away_team else "Unknown"
 
         row = [competition_name, home_team_name, away_team_name, match_date, venue_name, home_score, away_score]
-        rows_to_append.append([excel_safe(v) for v in row])
+        rows_to_append.append(row)
 
     # Write to main file (append mode)
     append_header = not os.path.exists(general_file)

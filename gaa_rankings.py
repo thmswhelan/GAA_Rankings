@@ -10,3 +10,4 @@ df_results = pd.read_csv('gaa_results.csv')
 # Initialize a DataFrame for rankings with starting rank of 50 for each county
 teams = pd.concat([df_results['Home Team'], df_results['Away Team']]).unique()
 df_rankings = pd.DataFrame({'Team': teams, 'Ranking': 50})
+df_rankings.to_csv('gaa_football_rankings.csv', index=False)

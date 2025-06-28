@@ -46,26 +46,25 @@ ratings = {team: 50 for team in teams}
 # Parameters
 divisor = 10
 
-home = row["Home Team"]
-away = row["Away Team"]
-venue = str(row["Venue"]).lower().strip()
 
-venue_county = venue_to_county.get(venue)
-
-if venue_county == home:
-    home_advantage = 2  # or your chosen value
-else:
-    home_advantage = 0  # neutral or unknown
-
-# Adjust expected using actual home advantage
-expected_home = 1 / (1 + 10 ** ((away_rating - (home_rating + home_advantage)) / divisor))
 
 
 # Elo update loop
 for idx, row in df_results.iterrows():
-    home = row['Home Team']
-    away = row['Away Team']
+    home = row["Home Team"]
+    away = row["Away Team"]
+    venue = str(row["Venue"]).lower().strip()
 
+    venue_county = venue_to_county.get(venue)
+
+    if venue_county == home:
+        home_advantage = 2  # or your chosen value
+    else:
+        home_advantage = 0  # neutral or unknown
+
+    # Adjust expected using actual home advantage
+    expected_home = 1 / (1 + 10 ** ((away_rating - (home_rating + home_advantage)) / divisor))
+    
     home_score = parse_score(row['Home Score'])
     away_score = parse_score(row['Away Score'])
 

@@ -5,7 +5,7 @@ from datetime import datetime
 
 # Step 1: Load gaa_results.csv into a DataFrame
 # Load data
-df_results = pd.read_csv("gaa_results.csv")
+df_results = pd.read_csv("gaa_results.csv", encoding="ISO-8859-1")
 
 # Keep only selected competitions
 valid_comps = [

@@ -7,6 +7,10 @@ from datetime import datetime
 # Load data
 df_results = pd.read_csv("gaa_results.csv", encoding="ISO-8859-1")
 
+df_venues = pd.read_csv("venue_county_map.csv", encoding="ISO-8859-1")
+venue_to_county = dict(zip(df_venues['Venue'].str.lower(), df_venues['County']))
+
+
 # Keep only selected competitions
 valid_comps = [
     "Allianz Football League Roinn 1",
@@ -40,22 +44,21 @@ teams = pd.concat([df_results['Home Team'], df_results['Away Team']]).unique()
 ratings = {team: 50 for team in teams}
 
 # Parameters
-home_advantage = 3
 divisor = 10
 
-# Determine if venue is home, away, or neutral
-venue = str(row['Venue']).lower()
-home_team = home.lower()
-away_team = away.lower()
+home = row["Home Team"]
+away = row["Away Team"]
+venue = str(row["Venue"]).lower().strip()
 
-# Simple check: if venue contains home team name, apply advantage
-if home_team in venue and away_team not in venue:
-    actual_home_advantage = home_advantage
+venue_county = venue_to_county.get(venue)
+
+if venue_county == home:
+    home_advantage = 2  # or your chosen value
 else:
-    actual_home_advantage = 0  # neutral or away
+    home_advantage = 0  # neutral or unknown
 
 # Adjust expected using actual home advantage
-expected_home = 1 / (1 + 10 ** ((away_rating - (home_rating + actual_home_advantage)) / divisor))
+expected_home = 1 / (1 + 10 ** ((away_rating - (home_rating + home_advantage)) / divisor))
 
 
 # Elo update loop

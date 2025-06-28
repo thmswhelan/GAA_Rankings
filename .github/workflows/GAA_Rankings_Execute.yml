@@ -1,27 +1,35 @@
-name: Run GAA Elo Script
+name: GAA Elo Rankings
 
 on:
   push:
     paths:
-      - '**.py'         # Run when any .py file is pushed
-  workflow_dispatch:     # Also allow manual triggering
+      - gaa_rankings.py
+      - gaa_results.csv
+      - venue_county_list.csv
+  workflow_dispatch:
 
 jobs:
-  run-python:
+  run-rankings:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          pip install pandas numpy
+    - name: Install dependencies
+      run: pip install pandas numpy
 
-      - name: Run Elo Script
-        run: |
-          python gaa_rankings.py
+    - name: Run GAA Rankings Script
+      run: python gaa_rankings.py
+
+    - name: Upload Elo Rankings Output
+      uses: actions/upload-artifact@v3
+      with:
+        name: gaa-elo-rankings
+        path: gaa_rankings_pivot.csv
+

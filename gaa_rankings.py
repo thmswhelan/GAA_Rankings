@@ -7,7 +7,7 @@ from datetime import datetime
 # Load data
 df_results = pd.read_csv("gaa_results.csv", encoding="ISO-8859-1")
 
-df_venues = pd.read_csv("venue_county_map.csv", encoding="ISO-8859-1")
+df_venues = pd.read_csv("venue_county_list.csv", encoding="ISO-8859-1")
 venue_to_county = dict(zip(df_venues['Venue'].str.lower(), df_venues['County']))
 
 

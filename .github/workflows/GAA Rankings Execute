@@ -1,0 +1,27 @@
+name: Run GAA Elo Script
+
+on:
+  push:
+    paths:
+      - '**.py'         # Run when any .py file is pushed
+  workflow_dispatch:     # Also allow manual triggering
+
+jobs:
+  run-python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          pip install pandas numpy
+
+      - name: Run Elo Script
+        run: |
+          python your_script_name.py

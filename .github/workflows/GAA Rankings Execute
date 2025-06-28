@@ -24,4 +24,4 @@ jobs:
 
       - name: Run Elo Script
         run: |
-          python your_script_name.py
+          python gaa_rankings.py

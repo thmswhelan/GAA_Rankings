@@ -4,6 +4,7 @@ import numpy as np
 import re
 from datetime import datetime
 import os
+import subprocess
 
 # Load match results
 df_results = pd.read_csv("gaa_results.csv", encoding="ISO-8859-1")
@@ -84,8 +85,11 @@ run_date = datetime.today().strftime('%Y-%m-%d')
 df_final = pd.DataFrame(list(ratings.items()), columns=["Team", run_date])
 
 output_file = "gaa_rankings_pivot.csv"
+# Remove duplicate date column if it exists
 if os.path.exists(output_file):
     df_history = pd.read_csv(output_file)
+    if run_date in df_history.columns:
+        df_history.drop(columns=[run_date], inplace=True)
     df_history = pd.merge(df_history, df_final, on="Team", how="outer")
 else:
     df_history = df_final
@@ -93,11 +97,11 @@ else:
 df_history.sort_values("Team", inplace=True)
 df_history.to_csv(output_file, index=False)
 
-import subprocess
-
-subprocess.run(["git", "add", "gaa_rankings_pivot.csv"])
-subprocess.run(["git", "commit", "-m", "Update rankings"])
+# Git commit & push
+subprocess.run(["git", "add", output_file])
+subprocess.run(["git", "commit", "-m", f"Update rankings for {run_date}"])
 subprocess.run(["git", "push"])
+
 
 print("Pivoted rankings saved to gaa_rankings_pivot.csv")
 

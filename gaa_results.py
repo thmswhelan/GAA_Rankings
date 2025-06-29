@@ -4,6 +4,7 @@ import csv
 from datetime import datetime
 import subprocess
 import os
+import pandas as pd
 
 # Today's date
 today = datetime.today()
@@ -55,13 +56,32 @@ if response.status_code == 200:
         rows_to_append.append(row)
 
     # Write to main file (append mode)
-    append_header = not os.path.exists(general_file)
-    with open(general_file, mode='a', newline='', encoding='utf-8') as gen_file:
-        gen_writer = csv.writer(gen_file)
-        if append_header:
-            gen_writer.writerow(["Competition", "Home Team", "Away Team", "Date", "Venue", "Home Score", "Away Score"])
-        gen_writer.writerows(rows_to_append)
+    # Column headers
+    headers = ["Competition", "Home Team", "Away Team", "Date", "Venue", "Home Score", "Away Score"]
 
+    # Load existing data if file exists
+    if os.path.exists(general_file):
+        existing_df = pd.read_csv(general_file)
+    else:
+        existing_df = pd.DataFrame(columns=headers)
+
+    # New data to append
+    new_df = pd.DataFrame(rows_to_append, columns=headers)
+
+    # Remove rows where score is 'Invalid score' or 'N/A'
+    valid_scores_df = new_df[
+        (~new_df["Home Score"].isin(["Invalid score", "N/A"])) &
+        (~new_df["Away Score"].isin(["Invalid score", "N/A"]))
+    ]
+
+    # Combine and remove duplicates
+    combined_df = pd.concat([existing_df, valid_scores_df], ignore_index=True)
+    combined_df.drop_duplicates(inplace=True)
+
+    # Save cleaned data
+    combined_df.to_csv(general_file, index=False, encoding='utf-8')
+
+    
     print(f"✅ Appended {len(rows_to_append)} rows to '{general_file}'.")
 
     # Git commit & push

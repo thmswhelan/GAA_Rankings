@@ -82,7 +82,11 @@ for idx, row in df_results.iterrows():
 
 # Save pivoted rating history
 run_date = datetime.today().strftime('%Y-%m-%d')
-df_final = pd.DataFrame(list(ratings.items()), columns=["Team", run_date])
+df_final = pd.DataFrame(
+    [(team, round(rating, 2)) for team, rating in ratings.items()],
+    columns=["Team", run_date]
+)
+
 
 output_file = "gaa_rankings_pivot.csv"
 # Remove duplicate date column if it exists

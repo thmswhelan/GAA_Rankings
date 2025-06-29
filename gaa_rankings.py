@@ -36,9 +36,23 @@ def parse_score(score_str):
     goals, points = map(int, score_str.strip().split("-"))
     return goals * 3 + points
 
-# Initialize ratings
-teams = pd.concat([df_results['Home Team'], df_results['Away Team']]).unique()
-ratings = {team: 50 for team in teams}
+# Initialize ratings from the second column of gaa_rankings_pivot.csv
+ratings = {}
+
+pivot_file = "gaa_rankings_pivot.csv"
+if os.path.exists(pivot_file):
+    df_pivot = pd.read_csv(pivot_file)
+    if df_pivot.shape[1] >= 2:
+        initial_col = df_pivot.columns[1]  # second column (e.g., "01/01/2025")
+        ratings = dict(zip(df_pivot["Team"], df_pivot[initial_col]))
+        print(f"✅ Initialized ratings from column: {initial_col}")
+    else:
+        print("⚠️ Pivot file does not have a second column. Falling back to default rating of 50.")
+else:
+    print("⚠️ Pivot file not found. Initializing ratings to 50.")
+    teams = pd.concat([df_results['Home Team'], df_results['Away Team']]).unique()
+    ratings = {team: 50 for team in teams}
+
 divisor = 10
 
 # Elo update loop

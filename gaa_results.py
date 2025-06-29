@@ -61,7 +61,7 @@ if response.status_code == 200:
 
     # Load existing data if file exists
     if os.path.exists(general_file):
-        existing_df = pd.read_csv(general_file, encoding='utf-8', errors='replace')
+        existing_df = pd.read_csv(general_file, encoding='ISO-8859-1')
     else:
         existing_df = pd.DataFrame(columns=headers)
 

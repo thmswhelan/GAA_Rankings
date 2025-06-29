@@ -20,6 +20,10 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install requests beautifulsoup4
+          
+      - name: Install Python dependencies
+        run: |
+          pip install requests beautifulsoup4 pandas
 
       - name: Run scraper script
         run: python gaa_results.py

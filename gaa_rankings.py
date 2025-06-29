@@ -92,6 +92,13 @@ else:
 
 df_history.sort_values("Team", inplace=True)
 df_history.to_csv(output_file, index=False)
+
+import subprocess
+
+subprocess.run(["git", "add", "gaa_rankings_pivot.csv"])
+subprocess.run(["git", "commit", "-m", "Update rankings"])
+subprocess.run(["git", "push"])
+
 print("Pivoted rankings saved to gaa_rankings_pivot.csv")
 
 

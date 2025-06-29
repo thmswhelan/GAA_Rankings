@@ -1,35 +1,35 @@
-name: GAA Elo Rankings
+name: Update GAA Rankings
 
 on:
-  push:
-    paths:
-      - gaa_rankings.py
-      - gaa_results.csv
-      - venue_county_list.csv
-  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 2"  # Runs every Tuesday at 09:00 UTC
+  workflow_dispatch:      # Allows manual triggering via GitHub UI
 
 jobs:
-  run-rankings:
+  update-rankings:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Install dependencies
-      run: pip install pandas numpy
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy beautifulsoup4 requests
 
-    - name: Run GAA Rankings Script
-      run: python gaa_rankings.py
+      - name: Run Ranking Script
+        run: python gaa_rankings.py
 
-    - name: Upload Elo Rankings Output
-      uses: actions/upload-artifact@v4
-      with:
-        name: gaa-elo-rankings
-        path: gaa_rankings_pivot.csv
-
+      - name: Commit and push changes
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add gaa_rankings_pivot.csv
+          git diff --cached --quiet || git commit -m "Update GAA rankings"
+          git push

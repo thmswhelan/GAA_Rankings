@@ -7,10 +7,9 @@ import os
 import subprocess
 import sys
 
-
 # Load match results
-df_results = pd.read_csv("gaa_results.csv", encoding="utf-8")
-df_venues = pd.read_csv("venue_county_list.csv", encoding="utf-8")
+df_results = pd.read_excel("gaa_results.xlsx")
+df_venues = pd.read_excel("venue_county_list.xlsx")
 venue_to_county = dict(zip(df_venues['Venue'].str.lower().str.strip(), df_venues['County']))
 
 # Keep only selected competitions
@@ -36,13 +35,12 @@ def parse_score(score_str):
     goals, points = map(int, score_str.strip().split("-"))
     return goals * 3 + points
 
-
-# Initialize ratings from the second column of gaa_rankings_pivot.csv
+# Initialize ratings from the second column of gaa_rankings_pivot.xlsx
 ratings = {}
 
-pivot_file = "gaa_rankings_pivot.csv"
+pivot_file = "gaa_rankings_pivot.xlsx"
 if os.path.exists(pivot_file):
-    df_pivot = pd.read_csv(pivot_file)
+    df_pivot = pd.read_excel(pivot_file)
     if df_pivot.shape[1] >= 2:
         initial_col = df_pivot.columns[1]  # second column (e.g., "01/01/2025")
         ratings = dict(zip(df_pivot["Team"], df_pivot[initial_col]))
@@ -113,11 +111,10 @@ df_final = pd.DataFrame(
     columns=["Team", run_date]
 )
 
-
-output_file = "gaa_rankings_pivot.csv"
+output_file = "gaa_rankings_pivot.xlsx"
 # Remove duplicate date column if it exists
 if os.path.exists(output_file):
-    df_history = pd.read_csv(output_file)
+    df_history = pd.read_excel(output_file)
     if run_date in df_history.columns:
         df_history.drop(columns=[run_date], inplace=True)
     df_history = pd.merge(df_history, df_final, on="Team", how="outer")
@@ -125,15 +122,14 @@ else:
     df_history = df_final
 
 df_history.sort_values("Team", inplace=True)
-df_history.to_csv(output_file, index=False)
+df_history.to_excel(output_file, index=False)
 
 # Git commit & push
 subprocess.run(["git", "add", output_file])
 subprocess.run(["git", "commit", "-m", f"Update rankings for {run_date}"])
 subprocess.run(["git", "push"])
 
-
-print("Pivoted rankings saved to gaa_rankings_pivot.csv")
+print("Pivoted rankings saved to gaa_rankings_pivot.xlsx")
 
 
 

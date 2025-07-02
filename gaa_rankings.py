@@ -79,8 +79,8 @@ for idx, row in df_results.iterrows():
 
     venue = str(row.get("Venue", "")).lower().strip()
     if venue not in venue_to_county:
-    print(f"❌ Venue '{venue}' not found in venue list.")
-    sys.exit(1)
+        print(f"❌ Venue '{venue}' not found in venue list.")
+        sys.exit(1)
 
     venue_county = venue_to_county.get(venue)
     home_advantage = 2 if venue_county == home else 0

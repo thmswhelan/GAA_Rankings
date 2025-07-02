@@ -10,7 +10,7 @@ import sys
 
 # Load match results
 df_results = pd.read_csv("gaa_results.csv", encoding="utf-8")
-df_venues = pd.read_csv("venue_county_list.csv", encoding="utf-8")
+df_venues = pd.read_csv("venue_county_list.csv", encoding="ISO-8859-1")
 venue_to_county = dict(zip(df_venues['Venue'].str.lower().str.strip(), df_venues['County']))
 
 # Keep only selected competitions

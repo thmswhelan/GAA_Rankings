@@ -5,6 +5,8 @@ import re
 from datetime import datetime
 import os
 import subprocess
+import sys
+
 
 # Load match results
 df_results = pd.read_csv("gaa_results.csv", encoding="ISO-8859-1")
@@ -28,13 +30,12 @@ df_results = df_results[df_results['Competition'].isin(valid_comps)].copy()
 
 # Parse scores
 def parse_score(score_str):
-    if not isinstance(score_str, str):
-        return None
-    match = re.match(r"^\d+-\d+$", score_str.strip())
-    if not match:
-        return None
+    if not isinstance(score_str, str) or not re.match(r"^\d+-\d+$", score_str.strip()):
+        print(f"❌ Invalid score format: '{score_str}'")
+        sys.exit(1)
     goals, points = map(int, score_str.strip().split("-"))
     return goals * 3 + points
+
 
 # Initialize ratings from the second column of gaa_rankings_pivot.csv
 ratings = {}
@@ -66,10 +67,21 @@ for idx, row in df_results.iterrows():
         print(f"Skipping row {idx} due to invalid score.")
         continue
 
+    if home not in ratings:
+    print(f"❌ Team '{home}' not found in initial ratings.")
+    sys.exit(1)
+    if away not in ratings:
+    print(f"❌ Team '{away}' not found in initial ratings.")
+    sys.exit(1)
+
     home_rating = ratings[home]
     away_rating = ratings[away]
 
     venue = str(row.get("Venue", "")).lower().strip()
+    if venue not in venue_to_county:
+    print(f"❌ Venue '{venue}' not found in venue list.")
+    sys.exit(1)
+
     venue_county = venue_to_county.get(venue)
     home_advantage = 2 if venue_county == home else 0
 

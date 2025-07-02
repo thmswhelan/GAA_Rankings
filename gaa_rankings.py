@@ -68,11 +68,11 @@ for idx, row in df_results.iterrows():
         continue
 
     if home not in ratings:
-    print(f"❌ Team '{home}' not found in initial ratings.")
-    sys.exit(1)
+        print(f"❌ Team '{home}' not found in initial ratings.")
+        sys.exit(1)
     if away not in ratings:
-    print(f"❌ Team '{away}' not found in initial ratings.")
-    sys.exit(1)
+        print(f"❌ Team '{away}' not found in initial ratings.")
+        sys.exit(1)
 
     home_rating = ratings[home]
     away_rating = ratings[away]

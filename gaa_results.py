@@ -8,7 +8,7 @@ import pandas as pd
 
 # Today's date
 today = datetime.today()
-general_file = "gaa_results.csv"
+general_file = "gaa_results.xlsx"
 
 # Target URL
 url = "https://www.gaa.ie/fixtures-results"
@@ -61,7 +61,7 @@ if response.status_code == 200:
 
     # Load existing data if file exists
     if os.path.exists(general_file):
-        existing_df = pd.read_csv(general_file, encoding='ISO-8859-1')
+        existing_df = pd.read_excel(general_file)
     else:
         existing_df = pd.DataFrame(columns=headers)
 
@@ -79,7 +79,7 @@ if response.status_code == 200:
     combined_df.drop_duplicates(inplace=True)
 
     # Save cleaned data
-    combined_df.to_csv(general_file, index=False, encoding='utf-8')
+    combined_df.to_excel(general_file, index=False)
 
     
     print(f"✅ Appended {len(rows_to_append)} rows to '{general_file}'.")

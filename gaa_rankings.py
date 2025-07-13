@@ -54,10 +54,13 @@ else:
 
 divisor = 10
 
+played_teams = set()
+
 # Elo update loop
 for idx, row in df_results.iterrows():
     home = row["Home Team"]
     away = row["Away Team"]
+    played_teams.update([home, away])
     home_score = parse_score(row['Home Score'])
     away_score = parse_score(row['Away Score'])
 
@@ -107,7 +110,7 @@ for idx, row in df_results.iterrows():
 # Save pivoted rating history
 run_date = datetime.today().strftime('%Y-%m-%d')
 df_final = pd.DataFrame(
-    [(team, round(rating, 2)) for team, rating in ratings.items()],
+    [(team, round(ratings[team], 2)) for team in played_teams],
     columns=["Team", run_date]
 )
 
@@ -117,7 +120,12 @@ if os.path.exists(output_file):
     df_history = pd.read_excel(output_file)
     if run_date in df_history.columns:
         df_history.drop(columns=[run_date], inplace=True)
-    df_history = pd.merge(df_history, df_final, on="Team", how="outer")
+
+    # Update only the teams that played
+    for _, row in df_final.iterrows():
+        team = row["Team"]
+        rating = row[run_date]
+        df_history.loc[df_history["Team"] == team, run_date] = rating
 else:
     df_history = df_final
 

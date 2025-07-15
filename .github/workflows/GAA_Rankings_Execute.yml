@@ -33,6 +33,6 @@ jobs:
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          git add gaa_rankings_pivot.csv
+          git add gaa_rankings_pivot.xlsx
           git diff --cached --quiet || git commit -m "Update GAA rankings"
           git push

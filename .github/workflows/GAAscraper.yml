@@ -37,7 +37,7 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add *.csv
+          git add *.xlsx
           git commit -m "Update GAA results CSV [skip ci]" || echo "No changes to commit"
           git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
           git push

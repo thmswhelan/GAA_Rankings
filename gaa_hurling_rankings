@@ -1,0 +1,148 @@
+# Calculate GAA Hurling Rankings
+import pandas as pd
+import numpy as np
+import re
+from datetime import datetime
+import os
+import subprocess
+import sys
+
+# Load match results
+df_results = pd.read_excel("gaa_results.xlsx")
+df_venues = pd.read_excel("venue_county_list.xlsx")
+venue_to_county = dict(zip(df_venues['Venue'].str.lower().str.strip(), df_venues['County']))
+
+# Keep only selected competitions
+valid_comps = ["Allianz Hurling League Roinn 1",
+"Allianz Hurling League Roinn 2A",
+"Allianz Hurling League Roinn 2B",
+"Allianz Hurling League Roinn 3A",
+"Allianz Hurling League Roinn 3B",
+"Leinster GAA Hurling Senior Championship",
+"Christy Ring Cup",
+"Nickey Rackard Cup",
+"Lory Meagher Cup",
+"Joe McDonagh Cup",
+"Munster GAA Hurling Senior Championship",
+"GAA Hurling All-Ireland Senior Championship",
+"Allianz Hurling League Roinn 1A",
+"Allianz Hurling League Roinn 1B",
+"Allianz Hurling League Roinn 2",
+"Allianz Hurling League Roinn 4",
+"Allianz Hurling League Roinn 3"]
+
+df_results = df_results[df_results['Competition'].isin(valid_comps)].copy()
+
+# Parse scores
+def parse_score(score_str):
+    if not isinstance(score_str, str) or not re.match(r"^\d+-\d+$", score_str.strip()):
+        print(f"❌ Invalid score format: '{score_str}'")
+        sys.exit(1)
+    goals, points = map(int, score_str.strip().split("-"))
+    return goals * 3 + points
+
+# Initialize ratings from the second column of gaa_hurling_rankings_pivot.xlsx
+ratings = {}
+
+pivot_file = "gaa_hurling_rankings_pivot.xlsx"
+if os.path.exists(pivot_file):
+    df_pivot = pd.read_excel(pivot_file)
+    if df_pivot.shape[1] >= 2:
+        initial_col = df_pivot.columns[1]  # second column (e.g., "01/01/2025")
+        ratings = dict(zip(df_pivot["Team"], df_pivot[initial_col]))
+        print(f"✅ Initialized ratings from column: {initial_col}")
+    else:
+        print("⚠️ Pivot file does not have a second column. Falling back to default rating of 50.")
+else:
+    print("⚠️ Pivot file not found. Initializing ratings to 50.")
+    teams = pd.concat([df_results['Home Team'], df_results['Away Team']]).unique()
+    ratings = {team: 50 for team in teams}
+
+divisor = 10
+
+played_teams = set()
+
+# Elo update loop
+for idx, row in df_results.iterrows():
+    home = row["Home Team"]
+    away = row["Away Team"]
+    played_teams.update([home, away])
+    home_score = parse_score(row['Home Score'])
+    away_score = parse_score(row['Away Score'])
+
+    if home_score is None or away_score is None:
+        print(f"Skipping row {idx} due to invalid score.")
+        continue
+
+    if home not in ratings:
+        print(f"❌ Team '{home}' not found in initial ratings.")
+        sys.exit(1)
+    if away not in ratings:
+        print(f"❌ Team '{away}' not found in initial ratings.")
+        sys.exit(1)
+
+    home_rating = ratings[home]
+    away_rating = ratings[away]
+
+    venue = str(row.get("Venue", "")).lower().strip()
+    if venue not in venue_to_county:
+        print(f"❌ Venue '{venue}' not found in venue list.")
+        sys.exit(1)
+
+    venue_county = venue_to_county.get(venue)
+    home_advantage = 2 if venue_county == home else 0
+
+    # Expected score
+    expected_home = 1 / (1 + 10 ** ((away_rating - (home_rating + home_advantage)) / divisor))
+    if home_score == away_score:
+        actual_home = 0.5
+    elif home_score > away_score:
+        actual_home = 1
+    else:
+        actual_home = 0
+        
+    # Competition-based K
+    competition = row["Competition"]
+    K = 2 if "league" in competition.lower() else 3
+
+    # Margin bonus
+    margin_bonus = 1.5 if abs(home_score - away_score) > 8 else 1.0
+
+    rating_change = round(K * margin_bonus * (actual_home - expected_home), 2)
+
+    ratings[home] += rating_change
+    ratings[away] -= rating_change
+
+# Save pivoted rating history
+run_date = datetime.today().strftime('%Y-%m-%d')
+df_final = pd.DataFrame(
+    [(team, round(ratings[team], 2)) for team in played_teams],
+    columns=["Team", run_date]
+)
+
+output_file = "gaa_hurling_rankings_pivot.xlsx"
+# Remove duplicate date column if it exists
+if os.path.exists(output_file):
+    df_history = pd.read_excel(output_file)
+    if run_date in df_history.columns:
+        df_history.drop(columns=[run_date], inplace=True)
+
+    # Update only the teams that played
+    for _, row in df_final.iterrows():
+        team = row["Team"]
+        rating = row[run_date]
+        df_history.loc[df_history["Team"] == team, run_date] = rating
+else:
+    df_history = df_final
+
+df_history.sort_values("Team", inplace=True)
+df_history.to_excel(output_file, index=False)
+
+# Git commit & push
+subprocess.run(["git", "add", output_file])
+subprocess.run(["git", "commit", "-m", f"Update rankings for {run_date}"])
+subprocess.run(["git", "push"])
+
+print("Pivoted rankings saved to gaa_hurling_rankings_pivot.xlsx")
+
+
